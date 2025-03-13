@@ -49,11 +49,11 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Import các route
 const topicsRoutes = require('./routes/topic');
-const vocabularyRoutes = require('./routes/vocabulary');
-// const questionsRoutes = require('./routes/questions');
-// const partsRoutes = require('./routes/parts');
-// const examsRoutes = require('./routes/exams');
-const userRoutes = require('./routes/users');
+// const vocabularyRoutes = require('./routes/vocabulary');
+// // const questionsRoutes = require('./routes/questions');
+// // const partsRoutes = require('./routes/parts');
+// // const examsRoutes = require('./routes/exams');
+// const userRoutes = require('./routes/users');
 // const lessonRoutes = require('./routes/lessons');
 // const examResult = require('./routes/examResult');
 
