@@ -4,6 +4,7 @@ const sql = require('pg');
 const config = require('./dbconfig');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const BASE_URL = "https://testdeploy-0vyb.onrender.com";
 
 const app = express();
 const port = 3000;
@@ -33,9 +34,10 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: "http://localhost:3000",
+                url: process.env.BASE_URL || "http://localhost:3000"
             },
         ],
+        
     },
     apis: ["./routes/*.js"], // Tự động quét các file trong thư mục routes
 };
