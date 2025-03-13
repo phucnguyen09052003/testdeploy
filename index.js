@@ -5,9 +5,10 @@ const config = require('./dbconfig');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const BASE_URL = "https://testdeploy-0vyb.onrender.com";
+const port = process.env.PORT || 3000;
 
 const app = express();
-const port = 3000;
+
 
 // Middleware
 app.use(cors());
@@ -34,9 +35,10 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: process.env.BASE_URL || "http://localhost:3000"
+                url: BASE_URL || process.env.BASE_URL || `http://localhost:${port}`,
             },
         ],
+        
         
     },
     apis: ["./routes/*.js"], // Tự động quét các file trong thư mục routes
