@@ -5,8 +5,8 @@ class VocabularyService extends IVocabularyService {
     async getAllVocabulary() {
         try {
             const pool = await db.getPool();
-            const result = await pool.request().query("SELECT * FROM Vocabulary");
-            return result.recordset;
+            const result = await pool.query("SELECT * FROM Vocabulary");
+            return result.rows; // PostgreSQL trả về `rows`
         } catch (err) {
             throw new Error(err.message);
         }
@@ -14,12 +14,13 @@ class VocabularyService extends IVocabularyService {
 
     async getWordById(id) {
         try {
-            console.log("dulieu: ",id)
+            console.log("Dữ liệu ID:", id);
             const pool = await db.getPool();
-            const result = await pool.request()
-                .input("id", db.sql.Int, id)
-                .query("SELECT * FROM Vocabulary WHERE WordID = @id");
-            return result.recordset[0];
+            const result = await pool.query(
+                "SELECT * FROM Vocabulary WHERE WordID = $1", 
+                [id] // Sử dụng tham số `$1`
+            );
+            return result.rows.length > 0 ? result.rows[0] : null;
         } catch (err) {
             throw new Error(err.message);
         }
@@ -28,10 +29,11 @@ class VocabularyService extends IVocabularyService {
     async getVocabularyByTopic(topicId) {
         try {
             const pool = await db.getPool();
-            const result = await pool.request()
-                .input("TopicID", db.sql.VarChar, topicId)
-                .query("SELECT * FROM Vocabulary WHERE TopicID = @TopicID");
-            return result.recordset;
+            const result = await pool.query(
+                "SELECT * FROM Vocabulary WHERE TopicID = $1", 
+                [topicId]
+            );
+            return result.rows;
         } catch (err) {
             throw new Error(err.message);
         }
@@ -40,13 +42,10 @@ class VocabularyService extends IVocabularyService {
     async createWord(word) {
         try {
             const pool = await db.getPool();
-            await pool.request()
-                .input("Word", db.sql.VarChar, word.Word)
-                .input("Translation", db.sql.NVarChar, word.Translation)
-                .input("TopicID", db.sql.VarChar, word.TopicID)
-                .input("Image", db.sql.VarChar, word.Image)
-                .query("INSERT INTO Vocabulary (Word, Translation, TopicID, Image) VALUES (@Word, @Translation, @TopicID, @Image)");
-
+            const result = await pool.query(
+                "INSERT INTO Vocabulary (Wordid,Word, Translation, TopicID, Image) VALUES ($1, $2, $3, $4,$5) RETURNING *",
+                [word.WordID,word.Word, word.Translation, word.TopicID, word.Image]
+            );
             return `Từ đã được thêm: ${word.Word}`;
         } catch (err) {
             throw new Error(err.message);
@@ -56,15 +55,12 @@ class VocabularyService extends IVocabularyService {
     async updateWord(id, word) {
         try {
             const pool = await db.getPool();
-            const result = await pool.request()
-                .input("ID", db.sql.Int, id)
-                .input("Word", db.sql.VarChar, word.Word)
-                .input("Translation", db.sql.NVarChar, word.Translation)
-                .input("TopicID", db.sql.VarChar, word.TopicID)
-                .input("Image", db.sql.VarChar, word.Image)
-                .query("UPDATE Vocabulary SET Word = @Word, Translation = @Translation, TopicID = @TopicID, Image = @Image WHERE WordID = @ID");
+            const result = await pool.query(
+                "UPDATE Vocabulary SET Word = $1, Translation = $2, TopicID = $3, Image = $4 WHERE WordID = $5 RETURNING *",
+                [word.Word, word.Translation, word.TopicID, word.Image, id]
+            );
 
-            if (result.rowsAffected[0] === 0) {
+            if (result.rowCount === 0) {
                 throw new Error("Không tìm thấy từ để sửa.");
             }
 
@@ -77,11 +73,12 @@ class VocabularyService extends IVocabularyService {
     async deleteWord(id) {
         try {
             const pool = await db.getPool();
-            const result = await pool.request()
-                .input("ID", db.sql.Int, id)
-                .query("DELETE FROM Vocabulary WHERE WordID = @ID");
+            const result = await pool.query(
+                "DELETE FROM Vocabulary WHERE WordID = $1 RETURNING *",
+                [id]
+            );
 
-            if (result.rowsAffected[0] === 0) {
+            if (result.rowCount === 0) {
                 throw new Error("Không tìm thấy từ để xóa.");
             }
 
